@@ -1,3 +1,3 @@
 # TRTtoDAT
-TRT to DAT console converter
+TRT to DAT format console converter
 > Danger! Code without comments and throwing exseptions!
