@@ -6,20 +6,18 @@
 #include <map>
 #include <iomanip>
 
-using namespace std;
-
-map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float initLenght, float finitLenght)
+std::map<float, float> getMapFromFile(std::string filePath, std::string fileName, std::string fileType, float initLenght, float finitLenght)
 {
-    ifstream inputFile;
+    std::ifstream inputFile;
     inputFile.open(filePath + fileName + fileType);
 
-    string line;
-    map<float, float> spectre;
+    std::string line;
+    std::map<float, float> spectre;
 
     while (inputFile) {
         getline(inputFile, line);
 
-        regex lineEx = regex("^3[0-9][0-9],[0-9][0-9];.*");
+        std::regex lineEx = std::regex("^3[0-9][0-9],[0-9][0-9];.*");
 
         float nm;
         float intensity;
@@ -32,7 +30,7 @@ map<float, float> getMapFromFile(string filePath, string fileName, string fileTy
 
             if (nm > initLenght && nm < finitLenght)
             {
-                spectre.insert(make_pair(nm, intensity));
+                spectre.insert(std::make_pair(nm, intensity));
             }            
         }
     }
@@ -40,54 +38,54 @@ map<float, float> getMapFromFile(string filePath, string fileName, string fileTy
     return spectre;
 }
 
-void createOutputFileFromMap(string filePath, string fileName, string fileType, map<float, float> float_data_map)
+void createOutputFileFromMap(std::string filePath, std::string fileName, std::string fileType, std::map<float, float> float_data_map)
 {
-    ofstream outputFile(filePath + fileName + fileType);
+    std::ofstream outputFile(filePath + fileName + fileType);
 
     for (auto& float_data : float_data_map) {
-        outputFile << fixed << setprecision(2) << float_data.first << "   "
-                   << fixed << setprecision(4) << float_data.second << endl;
+        outputFile << std::fixed << std::setprecision(2) << float_data.first << "   "
+                   << std::fixed << std::setprecision(4) << float_data.second << "\n";
     }
 }
 
 int main()
 {
-    cout << "The console doesn't understand Russian! Underscores only, no spaces! \n"
+    std::cout << "The console doesn't understand Russian! Underscores only, no spaces! \n"
          << "For more information check out the documentation. \n"
          << "If you ready... \n"
          << "Enter path to data (example: C:\\experiment\\trt_data): \n";
-    string inputFilePath;
-    cin >> inputFilePath;
+    std::string inputFilePath;
+    std::cin >> inputFilePath;
     inputFilePath = inputFilePath + "\\";
 
-    cout << "Enter initial wavelength without [nm] (example: 365): ";
+    std::cout << "\n" << "Enter initial wavelength without [nm] (example: 365): ";
     float initData;
-    cin >> initData;
+    std::cin >> initData;
     initData = initData - 0.05f;
 
-    cout << "Enter finite wavelength without [nm] (example: 385): ";
+    std::cout << "Enter finite wavelength without [nm] (example: 385): ";
     float finitData;
-    cin >> finitData;
+    std::cin >> finitData;
     finitData = finitData + 0.05f;
 
-    string outputFilePath;
+    std::string outputFilePath;
     outputFilePath = "C:\\trt_to_dat\\converted\\";
     std::filesystem::create_directory(outputFilePath);
     
-    string inputFileType = ".trt";
-    string outputFileType = ".dat";
+    std::string inputFileType = ".trt";
+    std::string outputFileType = ".dat";
 
     for (auto& file : std::filesystem::directory_iterator(inputFilePath))
     {
-        string fileName;
+        std::string fileName;
         fileName = file.path().filename().string();
         fileName = fileName.erase(fileName.length() - 4);
-        map<float, float> spectre;
+        std::map<float, float> spectre;
         spectre = getMapFromFile(inputFilePath, fileName, inputFileType, initData, finitData);
         createOutputFileFromMap(outputFilePath, fileName, outputFileType, spectre);
     }
 
-    cout << "\n" << "Converting data can be found along the path: \n"
+    std::cout << "\n" << "Converting data can be found along the path: \n"
          << outputFilePath << "\n"
          << "Maybe..." << "\n\n";
 
