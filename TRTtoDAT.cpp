@@ -17,12 +17,13 @@ std::map<float, float> getMapFromFile(std::string filePath, std::string fileName
     while (inputFile) {
         getline(inputFile, line);
 
-        std::regex lineEx = std::regex("^3[0-9][0-9],[0-9][0-9];.*");
+        std::regex lineExThreeDigitType = std::regex("^[0-9][0-9][0-9](,||.)[0-9][0-9];.*");
+        std::regex lineExFourDigitType = std::regex("^[0-9][0-9][0-9][0-9](,||.)[0-9][0-9];.*");
 
         float nm;
         float intensity;
 
-        if (regex_match(line, lineEx))
+        if (regex_match(line, lineExThreeDigitType))
         {
             replace(line.begin(), line.end(), ',', '.');
             nm = stof(line.substr(0, 6));
@@ -32,6 +33,18 @@ std::map<float, float> getMapFromFile(std::string filePath, std::string fileName
             {
                 spectre.insert(std::make_pair(nm, intensity));
             }            
+        }
+
+        if (regex_match(line, lineExFourDigitType))
+        {
+            replace(line.begin(), line.end(), ',', '.');
+            nm = stof(line.substr(0, 7));
+            intensity = stof(line.substr(8, 9));
+
+            if (nm > initLenght && nm < finitLenght)
+            {
+                spectre.insert(std::make_pair(nm, intensity));
+            }
         }
     }
 
@@ -43,7 +56,7 @@ void createOutputFileFromMap(std::string filePath, std::string fileName, std::st
     std::ofstream outputFile(filePath + fileName + fileType);
 
     for (auto& float_data : float_data_map) {
-        outputFile << std::fixed << std::setprecision(2) << float_data.first << "   "
+        outputFile << std::fixed << std::setprecision(2) << float_data.first << "	"
                    << std::fixed << std::setprecision(4) << float_data.second << "\n";
     }
 }
@@ -61,12 +74,12 @@ int main()
     std::cout << "\n" << "Enter initial wavelength without [nm] (example: 365): ";
     float initData;
     std::cin >> initData;
-    initData = initData - 0.05f;
+    initData = initData - 0.01f;
 
     std::cout << "Enter finite wavelength without [nm] (example: 385): ";
     float finitData;
     std::cin >> finitData;
-    finitData = finitData + 0.05f;
+    finitData = finitData + 0.01f;
 
     std::string outputFilePath;
     outputFilePath = "C:\\trt_to_dat\\converted\\";
@@ -81,10 +94,16 @@ int main()
         fileName = file.path().filename().string();
         fileName = fileName.erase(fileName.length() - 4);
         std::map<float, float> spectre;
-        spectre = getMapFromFile(inputFilePath, fileName, inputFileType, initData, finitData);
+
+        for (auto& float_data : spectre) {
+            std::cout << std::fixed << std::setprecision(2) << float_data.first << "	"
+                << std::fixed << std::setprecision(4) << float_data.second << "\n";
+        }
+
+        spectre = getMapFromFile(inputFilePath, fileName, inputFileType, initData, finitData);               
         createOutputFileFromMap(outputFilePath, fileName, outputFileType, spectre);
     }
-
+       
     std::cout << "\n" << "Converting data can be found along the path: \n"
          << outputFilePath << "\n"
          << "Maybe..." << "\n\n";
