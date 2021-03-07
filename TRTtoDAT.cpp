@@ -5,6 +5,7 @@
 #include <regex>
 #include <map>
 #include <iomanip>
+#include "TRTtoDAT.h"
 
 using std::cout;
 using std::cin;
@@ -19,7 +20,38 @@ using std::setprecision;
 using std::filesystem::create_directories;
 using std::filesystem::directory_iterator;
 
-map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float initLenght, float finitLenght)
+map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float startWavelenght, float endWavelenght);
+void createOutputFileFromMap(string filePath, string fileName, string fileType, map<float, float> float_data_map);
+string getInputFilePath();
+float getWavelength(string startOrEnd);
+void convert(string inputFilePath, string outputFilePath, float startWavelength, float endWavelength, string inputFileType, string outputFileType);
+void showOutputFilePath(string outputFilePath);
+
+int main()
+{    
+    string inputFilePath;
+    inputFilePath = getInputFilePath();  
+
+    float startWavelength;
+    startWavelength = getWavelength("start");
+
+    float endWavelength;
+    endWavelength = getWavelength("end");
+
+    string outputFilePath;
+    outputFilePath = "C:\\trt_to_dat\\converted\\";
+
+    create_directories(outputFilePath);    
+    string inputFileType = ".trt";
+    string outputFileType = ".dat";
+    convert(inputFilePath, outputFilePath, startWavelength, endWavelength, inputFileType, outputFileType);       
+    showOutputFilePath(outputFilePath);
+
+    system("pause");
+    return 0;
+}
+
+map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float startWavelenght, float endWavelenght)
 {
     ifstream inputFile;
     inputFile.open(filePath + fileName + fileType);
@@ -42,10 +74,10 @@ map<float, float> getMapFromFile(string filePath, string fileName, string fileTy
             nm = stof(line.substr(0, 6));
             intensity = stof(line.substr(7, 9));
 
-            if (nm > initLenght && nm < finitLenght)
+            if (nm > startWavelenght && nm < endWavelenght)
             {
                 spectre.insert(make_pair(nm, intensity));
-            }            
+            }
         }
 
         if (regex_match(line, lineExFourDigitType))
@@ -54,7 +86,7 @@ map<float, float> getMapFromFile(string filePath, string fileName, string fileTy
             nm = stof(line.substr(0, 7));
             intensity = stof(line.substr(8, 9));
 
-            if (nm > initLenght && nm < finitLenght)
+            if (nm > startWavelenght && nm < endWavelenght)
             {
                 spectre.insert(make_pair(nm, intensity));
             }
@@ -70,51 +102,46 @@ void createOutputFileFromMap(string filePath, string fileName, string fileType, 
 
     for (auto& float_data : float_data_map) {
         outputFile << fixed << setprecision(2) << float_data.first << "	"
-                   << fixed << setprecision(4) << float_data.second << "\n";
+            << fixed << setprecision(4) << float_data.second << "\n";
     }
 }
 
-int main()
+string getInputFilePath()
 {
     cout << "The console doesn't understand Russian! Underscores only, no spaces! \n"
-         << "For more information check out the documentation. \n"
-         << "If you ready... \n"
-         << "Enter path to data (example: C:\\experiment\\trt_data): \n";
+        << "For more information check out the documentation. \n"
+        << "If you ready... \n"
+        << "Enter path to data (example: C:\\experiment\\trt_data): \n";
     string inputFilePath;
     cin >> inputFilePath;
-    inputFilePath = inputFilePath + "\\";
+    return inputFilePath + "\\";
+}
 
-    cout << "\n" << "Enter initial wavelength without [nm] (example: 365): ";
-    float initData;
-    cin >> initData;
-    initData = initData - 0.01f;
+float getWavelength(string startOrEnd)
+{
+    if (startOrEnd == "start") { cout << "\n" << "Enter start wavelength without [nm] (example: 365): "; }
+    if (startOrEnd == "end") { cout << "\n" << "Enter end wavelength without [nm] (example: 385): "; }
+    float wavelength;
+    cin >> wavelength;
+    return wavelength - 0.01f;
+}
 
-    cout << "Enter finite wavelength without [nm] (example: 385): ";
-    float finitData;
-    cin >> finitData;
-    finitData = finitData + 0.01f;
-
-    string outputFilePath;
-    outputFilePath = "C:\\trt_to_dat\\converted\\";
-    create_directories(outputFilePath);
-    
-    string inputFileType = ".trt";
-    string outputFileType = ".dat";
-
+void convert(string inputFilePath, string outputFilePath, float startWavelength, float endWavelength, string inputFileType, string outputFileType)
+{
     for (auto& file : directory_iterator(inputFilePath))
     {
         string fileName;
         fileName = file.path().filename().string();
         fileName = fileName.erase(fileName.length() - 4);
         map<float, float> spectre;
-        spectre = getMapFromFile(inputFilePath, fileName, inputFileType, initData, finitData);               
+        spectre = getMapFromFile(inputFilePath, fileName, inputFileType, startWavelength, endWavelength);
         createOutputFileFromMap(outputFilePath, fileName, outputFileType, spectre);
     }
-       
-    cout << "\n" << "Converting data can be found along the path: \n"
-         << outputFilePath << "\n"
-         << "Maybe..." << "\n\n";
+}
 
-    system("pause");
-    return 0;
+void showOutputFilePath(string outputFilePath) 
+{
+    cout << "\n" << "Converting data can be found along the path: \n"
+        << outputFilePath << "\n"
+        << "Maybe..." << "\n\n";
 }
