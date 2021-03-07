@@ -6,19 +6,32 @@
 #include <map>
 #include <iomanip>
 
-std::map<float, float> getMapFromFile(std::string filePath, std::string fileName, std::string fileType, float initLenght, float finitLenght)
+using std::cout;
+using std::cin;
+using std::map;
+using std::string;
+using std::ifstream;
+using std::ofstream;
+using std::regex;
+using std::make_pair;
+using std::fixed;
+using std::setprecision;
+using std::filesystem::create_directories;
+using std::filesystem::directory_iterator;
+
+map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float initLenght, float finitLenght)
 {
-    std::ifstream inputFile;
+    ifstream inputFile;
     inputFile.open(filePath + fileName + fileType);
 
-    std::string line;
-    std::map<float, float> spectre;
+    string line;
+    map<float, float> spectre;
 
     while (inputFile) {
         getline(inputFile, line);
 
-        std::regex lineExThreeDigitType = std::regex("^[0-9][0-9][0-9](,||.)[0-9][0-9];.*");
-        std::regex lineExFourDigitType = std::regex("^[0-9][0-9][0-9][0-9](,||.)[0-9][0-9];.*");
+        regex lineExThreeDigitType = regex("^[0-9][0-9][0-9](,||.)[0-9][0-9];.*");
+        regex lineExFourDigitType = regex("^[0-9][0-9][0-9][0-9](,||.)[0-9][0-9];.*");
 
         float nm;
         float intensity;
@@ -31,7 +44,7 @@ std::map<float, float> getMapFromFile(std::string filePath, std::string fileName
 
             if (nm > initLenght && nm < finitLenght)
             {
-                spectre.insert(std::make_pair(nm, intensity));
+                spectre.insert(make_pair(nm, intensity));
             }            
         }
 
@@ -43,7 +56,7 @@ std::map<float, float> getMapFromFile(std::string filePath, std::string fileName
 
             if (nm > initLenght && nm < finitLenght)
             {
-                spectre.insert(std::make_pair(nm, intensity));
+                spectre.insert(make_pair(nm, intensity));
             }
         }
     }
@@ -51,60 +64,54 @@ std::map<float, float> getMapFromFile(std::string filePath, std::string fileName
     return spectre;
 }
 
-void createOutputFileFromMap(std::string filePath, std::string fileName, std::string fileType, std::map<float, float> float_data_map)
+void createOutputFileFromMap(string filePath, string fileName, string fileType, map<float, float> float_data_map)
 {
-    std::ofstream outputFile(filePath + fileName + fileType);
+    ofstream outputFile(filePath + fileName + fileType);
 
     for (auto& float_data : float_data_map) {
-        outputFile << std::fixed << std::setprecision(2) << float_data.first << "	"
-                   << std::fixed << std::setprecision(4) << float_data.second << "\n";
+        outputFile << fixed << setprecision(2) << float_data.first << "	"
+                   << fixed << setprecision(4) << float_data.second << "\n";
     }
 }
 
 int main()
 {
-    std::cout << "The console doesn't understand Russian! Underscores only, no spaces! \n"
+    cout << "The console doesn't understand Russian! Underscores only, no spaces! \n"
          << "For more information check out the documentation. \n"
          << "If you ready... \n"
          << "Enter path to data (example: C:\\experiment\\trt_data): \n";
-    std::string inputFilePath;
-    std::cin >> inputFilePath;
+    string inputFilePath;
+    cin >> inputFilePath;
     inputFilePath = inputFilePath + "\\";
 
-    std::cout << "\n" << "Enter initial wavelength without [nm] (example: 365): ";
+    cout << "\n" << "Enter initial wavelength without [nm] (example: 365): ";
     float initData;
-    std::cin >> initData;
+    cin >> initData;
     initData = initData - 0.01f;
 
-    std::cout << "Enter finite wavelength without [nm] (example: 385): ";
+    cout << "Enter finite wavelength without [nm] (example: 385): ";
     float finitData;
-    std::cin >> finitData;
+    cin >> finitData;
     finitData = finitData + 0.01f;
 
-    std::string outputFilePath;
+    string outputFilePath;
     outputFilePath = "C:\\trt_to_dat\\converted\\";
-    std::filesystem::create_directory(outputFilePath);
+    create_directories(outputFilePath);
     
-    std::string inputFileType = ".trt";
-    std::string outputFileType = ".dat";
+    string inputFileType = ".trt";
+    string outputFileType = ".dat";
 
-    for (auto& file : std::filesystem::directory_iterator(inputFilePath))
+    for (auto& file : directory_iterator(inputFilePath))
     {
-        std::string fileName;
+        string fileName;
         fileName = file.path().filename().string();
         fileName = fileName.erase(fileName.length() - 4);
-        std::map<float, float> spectre;
-
-        for (auto& float_data : spectre) {
-            std::cout << std::fixed << std::setprecision(2) << float_data.first << "	"
-                << std::fixed << std::setprecision(4) << float_data.second << "\n";
-        }
-
+        map<float, float> spectre;
         spectre = getMapFromFile(inputFilePath, fileName, inputFileType, initData, finitData);               
         createOutputFileFromMap(outputFilePath, fileName, outputFileType, spectre);
     }
        
-    std::cout << "\n" << "Converting data can be found along the path: \n"
+    cout << "\n" << "Converting data can be found along the path: \n"
          << outputFilePath << "\n"
          << "Maybe..." << "\n\n";
 
