@@ -92,7 +92,6 @@ map<float, float> getMapFromFile(string filePath, string fileName, string fileTy
             }
         }
     }
-
     return spectre;
 }
 
