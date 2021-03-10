@@ -28,6 +28,7 @@ float getWavelength(string startOrEnd);
 void createOutputFileFromMap(string filePath, string fileName, string fileType, map<float, float> float_data_map);
 void convert(string inputFilePath, string outputFilePath, float startWavelength, float endWavelength, string inputFileType, string outputFileType);
 void showOutputFilePath(string outputFilePath);
+void closeConsole();
 
 int main()
 {   
@@ -46,8 +47,7 @@ int main()
     convert(inputFilePath, outputFilePath, startWavelength, endWavelength, inputFileType, outputFileType);       
     showOutputFilePath(outputFilePath);
 
-    system("pause");
-    return 0;
+    closeConsole();
 }
 
 string getRootOfPath(string sPath)
@@ -150,4 +150,11 @@ void showOutputFilePath(string outputFilePath)
     cout << "\n" << "Converting data can be found along the path: \n"
          << outputFilePath << "\n"
          << "Maybe..." << "\n\n";
+}
+
+void closeConsole() 
+{
+    cout << "Press any button to close console... \n";
+    cin.ignore(256, '\n');
+    cin.get();
 }
