@@ -5,10 +5,10 @@
 #include <regex>
 #include <map>
 #include <iomanip>
-#include "TRTtoDAT.h"
 
 using std::cout;
 using std::cin;
+using std::getline;
 using std::map;
 using std::string;
 using std::ifstream;
@@ -19,36 +19,41 @@ using std::fixed;
 using std::setprecision;
 using std::filesystem::create_directories;
 using std::filesystem::directory_iterator;
+using std::filesystem::path;
 
 map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float startWavelenght, float endWavelenght);
-void createOutputFileFromMap(string filePath, string fileName, string fileType, map<float, float> float_data_map);
 string getInputFilePath();
+string getRootOfPath(string sPath);
 float getWavelength(string startOrEnd);
+void createOutputFileFromMap(string filePath, string fileName, string fileType, map<float, float> float_data_map);
 void convert(string inputFilePath, string outputFilePath, float startWavelength, float endWavelength, string inputFileType, string outputFileType);
 void showOutputFilePath(string outputFilePath);
 
 int main()
-{    
-    string inputFilePath;
-    inputFilePath = getInputFilePath();  
-
-    float startWavelength;
+{   
+    string inputFilePath, outputFilePath;
+    inputFilePath = getInputFilePath();
+    outputFilePath = getRootOfPath(inputFilePath) + "TRTtoDAT\\converted\\";
+            
+    float startWavelength, endWavelength;
     startWavelength = getWavelength("start");
-
-    float endWavelength;
     endWavelength = getWavelength("end");
-
-    string outputFilePath;
-    outputFilePath = "C:\\trt_to_dat\\converted\\";
-
-    create_directories(outputFilePath);    
+  
     string inputFileType = ".trt";
     string outputFileType = ".dat";
+
+    create_directories(outputFilePath);
     convert(inputFilePath, outputFilePath, startWavelength, endWavelength, inputFileType, outputFileType);       
     showOutputFilePath(outputFilePath);
 
     system("pause");
     return 0;
+}
+
+string getRootOfPath(string sPath)
+{
+    path pPath(sPath);
+    return pPath.root_path().string();
 }
 
 map<float, float> getMapFromFile(string filePath, string fileName, string fileType, float startWavelenght, float endWavelenght)
@@ -68,6 +73,7 @@ map<float, float> getMapFromFile(string filePath, string fileName, string fileTy
         float nm;
         float intensity;
 
+        // needs to do something with these "if" statements
         if (regex_match(line, lineExThreeDigitType))
         {
             replace(line.begin(), line.end(), ',', '.');
@@ -101,25 +107,26 @@ void createOutputFileFromMap(string filePath, string fileName, string fileType, 
 
     for (auto& float_data : float_data_map) {
         outputFile << fixed << setprecision(2) << float_data.first << "	"
-            << fixed << setprecision(4) << float_data.second << "\n";
+                   << fixed << setprecision(4) << float_data.second << "\n";
     }
 }
 
 string getInputFilePath()
 {
     cout << "The console doesn't understand Russian! Underscores only, no spaces! \n"
-        << "For more information check out the documentation. \n"
-        << "If you ready... \n"
-        << "Enter path to data (example: C:\\experiment\\trt_data): \n";
+         << "For more information check out the documentation. \n\n"
+         << "If you ready... \n"
+         << "Enter path to data (example: C:\\experiment\\trt_data): \n";
     string inputFilePath;
-    cin >> inputFilePath;
+    getline(cin, inputFilePath);
+    cout << "\n";
     return inputFilePath + "\\";
 }
 
 float getWavelength(string startOrEnd)
 {
-    if (startOrEnd == "start") { cout << "\n" << "Enter start wavelength without [nm] (example: 365): "; }
-    if (startOrEnd == "end") { cout << "\n" << "Enter end wavelength without [nm] (example: 385): "; }
+    if (startOrEnd == "start") { cout << "Enter start wavelength (example: 365): "; }
+    if (startOrEnd == "end")   { cout << "Enter end wavelength (example: 385): "; }
     float wavelength;
     cin >> wavelength;
     return wavelength - 0.01f;
@@ -141,6 +148,6 @@ void convert(string inputFilePath, string outputFilePath, float startWavelength,
 void showOutputFilePath(string outputFilePath) 
 {
     cout << "\n" << "Converting data can be found along the path: \n"
-        << outputFilePath << "\n"
-        << "Maybe..." << "\n\n";
+         << outputFilePath << "\n"
+         << "Maybe..." << "\n\n";
 }
