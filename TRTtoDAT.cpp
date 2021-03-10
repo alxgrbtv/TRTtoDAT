@@ -154,7 +154,7 @@ void showOutputFilePath(string outputFilePath)
 
 void closeConsole() 
 {
-    cout << "Press any button to close console... \n";
+    cout << "Press \"Enter\" to close console... \n";
     cin.ignore(256, '\n');
     cin.get();
 }
