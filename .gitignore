@@ -5,6 +5,9 @@
 
 # Only cpp file include
 TRTtoDAT.h
+TRTtoDAT.sln
+TRTtoDAT.vcxproj
+TRTtoDAT.vcxproj.filters
 
 # User-specific files
 *.rsuser
